@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean name="transformer.worker.abstractPdfaPilot" class="org.redpill.alfresco.repo.content.transform.PdfaPilotContentTransformerWorker" abstract="true">
+    <property name="endpointHost" value="${pdfapilot.endpoint.host}" />
+    <property name="endpointPort" value="${pdfapilot.endpoint.port}" />
+    <property name="pdfaPilotExe" value="${pdfapilot.exe}" />
+    <property name="documentFormatRegistry" ref="pdfaPilot.documentFormatRegistry" />
+    <property name="executer" ref="pdfaPilot.command" />
+    <property name="checkCommand" ref="pdfaPilot.checkCommand" />
+    <property name="enabled" value="${pdfapilot.enabled}" />
+    <property name="explicitTransformations">
+      <list>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/pdf" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/msword" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.ms-excel" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.ms-powerpoint" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.oasis.opendocument.text" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.oasis.opendocument.spreadsheet" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.oasis.opendocument.presentation" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean name="transformer.worker.pdfaPilot" class="org.redpill.alfresco.repo.content.transform.PdfaPilotContentTransformerWorker" parent="transformer.worker.abstractPdfaPilot">
+    <property name="mimetypeService" ref="MimetypeService" />
+  </bean>
+
+  <bean name="pdfaPilot.command" class="org.alfresco.util.exec.RuntimeExec">
+    <property name="commandsAndArguments">
+      <map>
+        <entry key=".*">
+          <list>
+            <value>${pdfapilot.exe}</value>
+            <value>--dist</value>
+            <value>--endpoint=${pdfapilot.endpoint.host}:${pdfapilot.endpoint.port}</value>
+            <value>${source}</value>
+            <value>SPLIT:${options}</value>
+            <value>--outputfile=${target}</value>
+            <value>--overwrite</value>
+          </list>
+        </entry>
+      </map>
+    </property>
+    <property name="defaultProperties">
+      <props>
+        <prop key="options"></prop>
+      </props>
+    </property>
+  </bean>
+
+  <bean name="pdfaPilot.checkCommand" class="org.alfresco.util.exec.RuntimeExec">
+    <property name="commandsAndArguments">
+      <map>
+        <entry key=".*">
+          <list>
+            <value>${pdfapilot.exe}</value>
+            <value>--version</value>
+          </list>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+  <bean name="pdfaPilot.defaultDocumentFormatRegistry" class="org.redpill.alfresco.repo.content.transform.DefaultDocumentFormatRegistry" />
+
+  <bean name="pdfaPilot.documentFormatRegistry" class="org.redpill.alfresco.repo.content.transform.JsonDocumentFormatRegistry">
+    <constructor-arg value="classpath:pdfapilot-document-formats.js" type="java.io.InputStream" />
+  </bean>
+
+  <bean name="pdfaPilot.pdfaOptions" class="org.redpill.alfresco.repo.content.transform.PdfaPilotTransformationOptions">
+    <property name="readLimitTimeMs" value="-1" />
+    <property name="maxSourceSizeKBytes" value="-1" />
+    <property name="readLimitKBytes" value="-1" />
+    <property name="pageLimit" value="-1" />
+    <property name="maxPages" value="-1" />
+    <property name="includeEmbedded" value="true" />
+    <property name="optimize" value="false" />
+    <property name="level" value="1b" />
+  </bean>
+
+  <bean name="pdfaPilot.pdfOptions" class="org.redpill.alfresco.repo.content.transform.PdfaPilotTransformationOptions">
+    <property name="readLimitTimeMs" value="-1" />
+    <property name="maxSourceSizeKBytes" value="-1" />
+    <property name="readLimitKBytes" value="-1" />
+    <property name="pageLimit" value="-1" />
+    <property name="maxPages" value="-1" />
+    <property name="includeEmbedded" value="true" />
+    <property name="optimize" value="true" />
+    <property name="level" value="" />
+  </bean>
+
+</beans>

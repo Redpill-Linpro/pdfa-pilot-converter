@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.alfresco.maven</groupId>
+    <artifactId>alfresco-sdk-parent</artifactId>
+    <version>1.0.1</version>
+  </parent>
+
+  <groupId>org.redpill-linpro.alfresco.repo.content.transform</groupId>
+  <artifactId>pdfa-pilot-converter</artifactId>
+  <version>1.0.1</version>
+
+  <name>pdfaPilot Converter</name>
+  <description>This is a transformer implementation as a subsystem of pdfaPilot run as a dispatcher.</description>
+
+  <properties>
+    <alfresco.groupId>org.alfresco</alfresco.groupId>
+    <alfresco.version>4.2.c</alfresco.version>
+  </properties>
+
+  <developers>
+    <developer>
+      <id>nike</id>
+      <name>Niklas Ekman</name>
+      <email>niklas.ekman@redpill-linpro.com</email>
+      <organization>Redpill Linpro</organization>
+      <organizationUrl>http://www.redpill-linpro.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor />
+  </contributors>
+
+  <scm>
+    <connection>scm:git:https://github.com/oakman/pdfa-pilot-converter.git</connection>
+    <developerConnection>scm:git:https://github.com/oakman/pdfa-pilot-converter.git</developerConnection>
+    <url>https://github.com/oakman/pdfa-pilot-converter</url>
+    <tag>pdfa-pilot-converter-1.0.0</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/oakman/pdfa-pilot-converter/issues</url>
+  </issueManagement>
+
+  <distributionManagement>
+    <repository />
+    <snapshotRepository />
+    <site />
+  </distributionManagement>
+
+  <!-- Here we realize the connection with the Alfresco selected platform (e.g.version and edition) -->
+  <dependencyManagement>
+    <dependencies>
+      <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco version/edition (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
+        NOTE: You still need to define dependencies in your POM, but you can omit version as it's enforced by this dependencyManagement. NOTE: It defaults to the 
+        latest version this SDK pom has been tested with, but alfresco version can/should be overridden in your project's pom -->
+      <dependency>
+        <groupId>${alfresco.groupId}</groupId>
+        <artifactId>alfresco-platform-distribution</artifactId>
+        <version>${alfresco.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>${alfresco.groupId}</groupId>
+      <artifactId>alfresco-repository</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${alfresco.groupId}</groupId>
+      <artifactId>alfresco-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>surefire-it</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
+              <includes>
+                <include>**/*IntegrationTest.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <!-- This repository is only needed to retrieve Alfresco parent POM. NOTE: This can be removed when/if Alfresco will be on Maven Central -->
+  <repositories>
+    <repository>
+      <id>alfresco-public</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>alfresco-public-snapshots</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
+</project>

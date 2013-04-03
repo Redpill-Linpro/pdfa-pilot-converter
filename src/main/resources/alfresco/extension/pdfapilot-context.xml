@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!-- Content transformers -->
+  <bean id="transformer.complex.pdfaPilot.Image" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+    <property name="transformers">
+      <list>
+        <ref bean="transformer.pdfaPilot" />
+        <ref bean="transformer.complex.PDF.Image" />
+      </list>
+    </property>
+    <property name="intermediateMimetypes">
+      <list>
+        <value>application/pdf</value>
+      </list>
+    </property>
+    <!-- Note: there are maxSourceSizeKBytes limits on transformer.JodConverter transforming to pdf
+         which may cause this transformer not to be selected because it is too slow. -->
+  </bean>
+
+  <!-- Import the JodConverter transformer worker from the OOoJodconverter subsystem -->
+  <bean id="transformer.worker.pdfaPilot" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+    <property name="sourceApplicationContextFactory">
+      <ref bean="pdfaPilot" />
+    </property>
+    <property name="sourceBeanName">
+      <value>transformer.worker.pdfaPilot</value>
+    </property>
+    <property name="interfaces">
+      <list>
+        <value>org.alfresco.repo.content.transform.ContentTransformerWorker</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="transformer.pdfaPilot" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
+    <property name="worker">
+      <ref bean="transformer.worker.pdfaPilot" />
+    </property>
+    <property name="mimetypeLimits">
+      <ref bean="transformer.OpenOffice.mimetypeLimits" />
+    </property>
+    <property name="explicitTransformations">
+      <list>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/pdf" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/msword" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.ms-excel" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.ms-powerpoint" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.oasis.opendocument.text" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.oasis.opendocument.spreadsheet" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.oasis.opendocument.presentation" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="transformer.complex.pdfaPilot.PdfBox" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+    <property name="transformers">
+      <list>
+        <ref bean="transformer.pdfaPilot" />
+        <ref bean="transformer.PdfBox" />
+      </list>
+    </property>
+    <property name="intermediateMimetypes">
+      <list>
+        <value>application/pdf</value>
+      </list>
+    </property>
+    <property name="mimetypeLimits">
+      <ref bean="transformer.complex.OpenOffice.PdfBox.mimetypeLimits" />
+    </property>
+    <!-- Note: there are maxSourceSizeKBytes limits on transformer.JodConverter transforming to pdf
+         which may cause this transformer not to be selected because it is too slow. -->
+  </bean>
+
+  <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+    <property name="transformers">
+      <list>
+        <ref bean="transformer.pdfaPilot" />
+        <ref bean="transformer.Pdf2swf" />
+      </list>
+    </property>
+    <property name="intermediateMimetypes">
+      <list>
+        <value>application/pdf</value>
+      </list>
+    </property>
+    <property name="mimetypeLimits">
+      <ref bean="transformer.complex.OpenOffice.Pdf2swf.mimetypeLimits" />
+    </property>
+  </bean>
+
+</beans>
