@@ -39,3 +39,15 @@ pdfapilot.endpoint.host|hostname or IP of pdfaPilot dispatcher
 pdfapilot.endpoint.port|port of pdfaPilot dispatcher
 pdfapilot.exe|path of pdfaPilot CLI executable
 pdfapilot.enabled|true or false
+
+When the project has been built include
+
+```xml
+<dependency>
+  <groupId>org.redpill-linpro.alfresco.repo.content.transform</groupId>
+  <artifactId>pdfa-pilot-converter</artifactId>
+  <version>1.0.1</version>
+</dependency>  
+```
+
+in your Maven pom file for your Alfresco repository AMP project.
