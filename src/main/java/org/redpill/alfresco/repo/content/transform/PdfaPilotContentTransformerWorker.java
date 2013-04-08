@@ -161,19 +161,19 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     String targetExtension = _mimetypeService.getExtension(targetMimetype);
 
     if (sourceExtension == null || targetExtension == null) {
-      throw new AlfrescoRuntimeException("Unknown extensions for mimetypes: \n" + "   source mimetype: " + sourceMimetype + "\n"
-          + "   source extension: " + sourceExtension + "\n" + "   target mimetype: " + targetMimetype + "\n" + "   target extension: "
-          + targetExtension);
+      throw new AlfrescoRuntimeException("Unknown extensions for mimetypes: \n" + "   source mimetype: " + sourceMimetype + "\n" + "   source extension: " + sourceExtension + "\n"
+          + "   target mimetype: " + targetMimetype + "\n" + "   target extension: " + targetExtension);
     }
 
-    // create required temp files
-    File sourceFile = TempFileProvider.createTempFile(getClass().getSimpleName() + "_source_", "." + sourceExtension);
+    // create required temp files - PPCTW = PdfaPilotContentTransformerWorker -
+    // good with short filename if pdfaPilot is on Windows machine with limited
+    // hierarchy
+    File sourceFile = TempFileProvider.createTempFile("PPCTW_source_", "." + sourceExtension);
 
-    File targetFile = TempFileProvider.createTempFile(getClass().getSimpleName() + "_target_", "." + targetExtension);
+    File targetFile = TempFileProvider.createTempFile("PPCTW_target_", "." + targetExtension);
 
     // pdfaPilot adds _PDFA to the final name, thereof this one here
-    File finalTargetFile = new File(FilenameUtils.getFullPath(targetFile.getAbsolutePath()) + FilenameUtils.getBaseName(targetFile.getName())
-        + "_PDFA" + "." + targetExtension);
+    File finalTargetFile = new File(FilenameUtils.getFullPath(targetFile.getAbsolutePath()) + FilenameUtils.getBaseName(targetFile.getName()) + "_PDFA" + "." + targetExtension);
 
     // pull reader file into source temp file
     reader.getContent(sourceFile);
@@ -280,11 +280,11 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   public boolean pingServer() {
     boolean result;
 
-    final TelnetClient telnetClient = new TelnetClient();
+    TelnetClient telnetClient = new TelnetClient();
 
     try {
-
       telnetClient.setDefaultTimeout(1000);
+
       telnetClient.setConnectTimeout(1000);
 
       telnetClient.connect(_endpointHost, _endpointPort);

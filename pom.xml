@@ -11,7 +11,7 @@
 
   <groupId>org.redpill-linpro.alfresco.repo.content.transform</groupId>
   <artifactId>pdfa-pilot-converter</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 
   <name>pdfaPilot Converter</name>
   <description>This is a transformer implementation as a subsystem of pdfaPilot run as a dispatcher.</description>
@@ -36,22 +36,16 @@
   </contributors>
 
   <scm>
-    <connection>scm:git:https://github.com/oakman/pdfa-pilot-converter.git</connection>
-    <developerConnection>scm:git:https://github.com/oakman/pdfa-pilot-converter.git</developerConnection>
-    <url>https://github.com/oakman/pdfa-pilot-converter</url>
+    <connection>scm:git:https://github.com/Redpill-Linpro/pdfa-pilot-converter.git</connection>
+    <developerConnection>scm:git:https://github.com/Redpill-Linpro/pdfa-pilot-converter.git</developerConnection>
+    <url>https://github.com/Redpill-Linpro/pdfa-pilot-converter</url>
     <tag>pdfa-pilot-converter-1.0.0</tag>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/oakman/pdfa-pilot-converter/issues</url>
+    <url>https://github.com/Redpill-Linpro/pdfa-pilot-converter/issues</url>
   </issueManagement>
-
-  <distributionManagement>
-    <repository />
-    <snapshotRepository />
-    <site />
-  </distributionManagement>
 
   <!-- Here we realize the connection with the Alfresco selected platform (e.g.version and edition) -->
   <dependencyManagement>
@@ -92,6 +86,13 @@
       <artifactId>mockito-all</artifactId>
       <version>1.9.5</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>3.0.6.RELEASE</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
