@@ -36,15 +36,15 @@
   </contributors>
 
   <scm>
-    <connection>scm:git:https://github.com/oakman/pdfa-pilot-converter.git</connection>
-    <developerConnection>scm:git:https://github.com/oakman/pdfa-pilot-converter.git</developerConnection>
-    <url>https://github.com/oakman/pdfa-pilot-converter</url>
+    <connection>scm:git:https://github.com/Redpill-Linpro/pdfa-pilot-converter.git</connection>
+    <developerConnection>scm:git:https://github.com/Redpill-Linpro/pdfa-pilot-converter.git</developerConnection>
+    <url>https://github.com/Redpill-Linpro/pdfa-pilot-converter</url>
     <tag>pdfa-pilot-converter-1.0.0</tag>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/oakman/pdfa-pilot-converter/issues</url>
+    <url>https://github.com/Redpill-Linpro/pdfa-pilot-converter/issues</url>
   </issueManagement>
 
   <!-- Here we realize the connection with the Alfresco selected platform (e.g.version and edition) -->
