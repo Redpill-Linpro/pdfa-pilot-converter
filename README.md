@@ -46,7 +46,7 @@ When the project has been built include
 <dependency>
   <groupId>org.redpill-linpro.alfresco.repo.content.transform</groupId>
   <artifactId>pdfa-pilot-converter</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>  
 ```
 
