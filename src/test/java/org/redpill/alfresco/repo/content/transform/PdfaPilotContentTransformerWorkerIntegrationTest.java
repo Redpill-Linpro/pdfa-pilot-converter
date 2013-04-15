@@ -1,7 +1,7 @@
 package org.redpill.alfresco.repo.content.transform;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -32,8 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
-@ContextConfiguration(locations = { "classpath*:alfresco/subsystems/pdfaPilot/default/pdfapilot-context.xml",
-"classpath:test-pdfa-pilot-convert-context.xml" })
+@ContextConfiguration(locations = { "classpath*:alfresco/subsystems/pdfaPilot/default/pdfapilot-context.xml", "classpath:test-pdfa-pilot-convert-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PdfaPilotContentTransformerWorkerIntegrationTest {
 
@@ -144,7 +143,7 @@ public class PdfaPilotContentTransformerWorkerIntegrationTest {
     PDDocument document = PDDocument.load(file);
 
     try {
-      assertSame(expectedPageCount, document.getNumberOfPages());
+      assertEquals(expectedPageCount, document.getNumberOfPages());
     } finally {
       document.close();
     }
