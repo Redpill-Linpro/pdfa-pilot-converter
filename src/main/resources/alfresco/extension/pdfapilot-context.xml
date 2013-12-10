@@ -14,11 +14,9 @@
         <value>application/pdf</value>
       </list>
     </property>
-    <!-- Note: there are maxSourceSizeKBytes limits on transformer.JodConverter transforming to pdf
-         which may cause this transformer not to be selected because it is too slow. -->
   </bean>
 
-  <!-- Import the JodConverter transformer worker from the OOoJodconverter subsystem -->
+  <!-- Import the pdfaPilot transformer worker from the pdfaPilot subsystem -->
   <bean id="transformer.worker.pdfaPilot" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
     <property name="sourceApplicationContextFactory">
       <ref bean="pdfaPilot" />
@@ -101,8 +99,6 @@
     <property name="mimetypeLimits">
       <ref bean="transformer.complex.OpenOffice.PdfBox.mimetypeLimits" />
     </property>
-    <!-- Note: there are maxSourceSizeKBytes limits on transformer.JodConverter transforming to pdf
-         which may cause this transformer not to be selected because it is too slow. -->
   </bean>
 
   <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
