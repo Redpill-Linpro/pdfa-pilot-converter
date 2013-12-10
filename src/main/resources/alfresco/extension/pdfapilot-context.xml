@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
   <!-- Content transformers -->
-  <bean id="transformer.complex.pdfaPilot.Image" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+  <bean id="transformer.complex.pdfaPilot.Image" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
         <ref bean="transformer.pdfaPilot" />
@@ -84,7 +84,7 @@
     </property>
   </bean>
 
-  <bean id="transformer.complex.pdfaPilot.PdfBox" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+  <bean id="transformer.complex.pdfaPilot.PdfBox" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
         <ref bean="transformer.pdfaPilot" />
@@ -101,7 +101,7 @@
     </property>
   </bean>
 
-  <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+  <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
         <ref bean="transformer.pdfaPilot" />
