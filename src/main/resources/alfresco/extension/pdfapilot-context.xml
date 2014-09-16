@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
   <!-- Content transformers -->
-  <bean id="transformer.complex.pdfaPilot.Image" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+  <bean id="transformer.complex.pdfaPilot.Image" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
         <ref bean="transformer.pdfaPilot" />
@@ -14,11 +14,9 @@
         <value>application/pdf</value>
       </list>
     </property>
-    <!-- Note: there are maxSourceSizeKBytes limits on transformer.JodConverter transforming to pdf
-         which may cause this transformer not to be selected because it is too slow. -->
   </bean>
 
-  <!-- Import the JodConverter transformer worker from the OOoJodconverter subsystem -->
+  <!-- Import the pdfaPilot transformer worker from the pdfaPilot subsystem -->
   <bean id="transformer.worker.pdfaPilot" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
     <property name="sourceApplicationContextFactory">
       <ref bean="pdfaPilot" />
@@ -86,7 +84,7 @@
     </property>
   </bean>
 
-  <bean id="transformer.complex.pdfaPilot.PdfBox" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+  <bean id="transformer.complex.pdfaPilot.PdfBox" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
         <ref bean="transformer.pdfaPilot" />
@@ -101,11 +99,9 @@
     <property name="mimetypeLimits">
       <ref bean="transformer.complex.OpenOffice.PdfBox.mimetypeLimits" />
     </property>
-    <!-- Note: there are maxSourceSizeKBytes limits on transformer.JodConverter transforming to pdf
-         which may cause this transformer not to be selected because it is too slow. -->
   </bean>
 
-  <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseComplexContentTransformer">
+  <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
         <ref bean="transformer.pdfaPilot" />

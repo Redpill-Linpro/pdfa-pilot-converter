@@ -20,6 +20,8 @@ public class PdfaPilotTransformationOptions extends TransformationOptions {
 
   private boolean _optimize = true;
 
+  private boolean _failSilently = false;
+
   /**
    * Default constructor
    */
@@ -29,10 +31,14 @@ public class PdfaPilotTransformationOptions extends TransformationOptions {
   /**
    * Constructor
    *
-   * @param sourceNodeRef         the source node reference
-   * @param sourceContentProperty the source content property
-   * @param targetNodeRef         the target node reference
-   * @param targetContentProperty the target content property
+   * @param sourceNodeRef
+   *          the source node reference
+   * @param sourceContentProperty
+   *          the source content property
+   * @param targetNodeRef
+   *          the target node reference
+   * @param targetContentProperty
+   *          the target content property
    */
   public PdfaPilotTransformationOptions(NodeRef sourceNodeRef, QName sourceContentProperty, NodeRef targetNodeRef, QName targetContentProperty) {
     super(sourceNodeRef, sourceContentProperty, targetNodeRef, targetContentProperty);
@@ -41,8 +47,10 @@ public class PdfaPilotTransformationOptions extends TransformationOptions {
   /**
    * Constructor
    *
-   * @param sourceNodeRef the source node reference
-   * @param targetNodeRef the target node reference
+   * @param sourceNodeRef
+   *          the source node reference
+   * @param targetNodeRef
+   *          the target node reference
    */
   public PdfaPilotTransformationOptions(NodeRef sourceNodeRef, NodeRef targetNodeRef) {
     super(sourceNodeRef, null, targetNodeRef, null);
@@ -62,6 +70,14 @@ public class PdfaPilotTransformationOptions extends TransformationOptions {
 
   public boolean isOptimize() {
     return _optimize;
+  }
+
+  public void setFailSilently(boolean failSilently) {
+    _failSilently = failSilently;
+  }
+
+  public boolean isFailSilently() {
+    return _failSilently;
   }
 
 }
