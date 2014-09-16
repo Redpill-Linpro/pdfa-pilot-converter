@@ -11,7 +11,7 @@
 
   <groupId>org.redpill-linpro.alfresco.repo.content.transform</groupId>
   <artifactId>pdfa-pilot-converter</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
 
   <name>pdfaPilot Converter</name>
   <description>This is a transformer implementation as a subsystem of pdfaPilot run as a dispatcher.</description>
