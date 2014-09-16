@@ -145,7 +145,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   }
 
   @Override
-  public void transform(ContentReader reader, ContentWriter writer, TransformationOptions options) throws Exception {
+  public void transform(final ContentReader reader, final ContentWriter writer, final TransformationOptions options) throws Exception {
     if (!isAvailable()) {
       throw new ContentIOException("Content conversion failed (unavailable): \n" + "   reader: " + reader + "\n" + "   writer: " + writer);
     }
@@ -179,7 +179,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     reader.getContent(sourceFile);
 
     // transformDoc the source temp file to the target temp file
-    transformInternal(sourceFile, targetFile, options);
+    transformInternal(sourceFile, targetFile, finalTargetFile, options);
 
     // upload the output document
     if (finalTargetFile.exists() && finalTargetFile.length() > 0) {
@@ -187,7 +187,15 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     } else if (targetFile.exists() && targetFile.length() > 0) {
       writer.putContent(targetFile);
     } else {
-      throw new ContentIOException("pdfaPilot transformation failed to write output file");
+      boolean failSilently = isFailSilently(options);
+
+      String message = "pdfaPilot transformation failed to write output file";
+
+      if (failSilently) {
+        LOG.warn(message);
+      } else {
+        throw new ContentIOException(message);
+      }
     }
 
     // done
@@ -196,10 +204,12 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     }
   }
 
-  protected void transformInternal(File sourceFile, File targetFile, TransformationOptions options) throws Exception {
+  protected void transformInternal(File sourceFile, File targetFile, File finalTargetFile, TransformationOptions options) throws Exception {
     Map<String, String> properties = new HashMap<String, String>(5);
 
     String commandOptions = "";
+
+    boolean failSilently = isFailSilently(options);
 
     // set properties
     if (options instanceof PdfaPilotTransformationOptions) {
@@ -227,13 +237,34 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
     // everything from pdfaPilot that's equal to or above 100 is an error
     if (result.getExitValue() >= 100) {
-      throw new ContentIOException("Failed to perform pdfaPilot transformation: \n" + result);
+      targetFile.delete();
+      finalTargetFile.delete();
+
+      String message = "Failed to perform pdfaPilot transformation: \n" + result;
+
+      if (failSilently) {
+        LOG.warn(message);
+      } else {
+        throw new ContentIOException(message);
+      }
     }
 
     // success
     if (LOG.isDebugEnabled()) {
       LOG.debug("pdfaPilot executed successfully: \n" + _executer);
     }
+  }
+
+  private boolean isFailSilently(TransformationOptions options) {
+    boolean failSilently = false;
+
+    if (options instanceof PdfaPilotTransformationOptions) {
+      PdfaPilotTransformationOptions pdfaPilotOptions = (PdfaPilotTransformationOptions) options;
+
+      failSilently = pdfaPilotOptions.isFailSilently();
+    }
+
+    return failSilently;
   }
 
   @Override
