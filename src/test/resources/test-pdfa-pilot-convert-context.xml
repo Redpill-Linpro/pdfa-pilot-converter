@@ -43,6 +43,18 @@
     </property>
   </bean>
 
+  <!-- This is a mocked MimetypeService -->
+  <bean name="NodeService" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="target">
+      <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="org.alfresco.service.cmr.repository.NodeService" />
+      </bean>
+    </property>
+    <property name="proxyInterfaces">
+      <value>org.alfresco.service.cmr.repository.NodeService</value>
+    </property>
+  </bean>
+
   <bean name="transformer.worker.PdfaPilot" class="org.redpill.alfresco.repo.content.transform.PdfaPilotContentTransformerWorker" parent="transformer.worker.abstractPdfaPilot">
     <property name="mimetypeService" ref="MimetypeService" />
     <property name="enabled" value="true" />

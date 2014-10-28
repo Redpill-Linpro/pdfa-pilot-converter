@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.transform.ContentTransformerHelper;
 import org.alfresco.repo.content.transform.ContentTransformerWorker;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.MimetypeService;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.TransformationOptions;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.telnet.TelnetClient;
@@ -51,6 +55,8 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   private MimetypeService _mimetypeService;
 
   private DocumentFormatRegistry _documentFormatRegistry;
+  
+  private NodeService _nodeService;
 
   private boolean _enabled;
 
@@ -61,6 +67,10 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
   public void setDocumentFormatRegistry(DocumentFormatRegistry documentFormatRegistry) {
     _documentFormatRegistry = documentFormatRegistry;
+  }
+  
+  public void setNodeService(NodeService nodeService) {
+    _nodeService = nodeService;
   }
 
   public void setEnabled(boolean enabled) {
@@ -168,7 +178,11 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // create required temp files - PPCTW = PdfaPilotContentTransformerWorker -
     // good with short filename if pdfaPilot is on Windows machine with limited
     // hierarchy
-    File sourceFile = TempFileProvider.createTempFile("PPCTW_source_", "." + sourceExtension);
+    File sourceFile = getTempFromFile(options.getSourceNodeRef(), sourceExtension);
+    
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Setting source file to " + sourceFile);
+    }
 
     File targetFile = TempFileProvider.createTempFile("PPCTW_target_", "." + targetExtension);
 
@@ -332,6 +346,28 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     }
 
     return result;
+  }
+
+  private File getTempFromFile(NodeRef nodeRef, String extension) {
+    if (nodeRef == null) {
+      return TempFileProvider.createTempFile("JodContentTransformer-source-", "." + extension);
+    }
+
+    try {
+      final File systemTempDir = TempFileProvider.getTempDir();
+
+      final File tempDir = new File(systemTempDir + "/" + System.nanoTime());
+
+      FileUtils.forceMkdir(tempDir);
+
+      String filename = (String) _nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+      filename = FilenameUtils.getBaseName(filename) + "." + extension;
+
+      return new File(tempDir, filename);
+    } catch (final Exception ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
 }
