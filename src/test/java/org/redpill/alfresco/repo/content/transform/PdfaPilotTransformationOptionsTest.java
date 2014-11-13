@@ -25,7 +25,7 @@ public class PdfaPilotTransformationOptionsTest {
   public void testPdfaOptions() {
     PdfaPilotTransformationOptions options = (PdfaPilotTransformationOptions) _applicationContext.getBean("pdfaPilot.pdfaOptions");
 
-    assertEquals("1b", options.getLevel());
+    assertEquals("2b", options.getLevel());
     assertFalse(options.isOptimize());
   }
 
