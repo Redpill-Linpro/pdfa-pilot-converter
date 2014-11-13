@@ -41,6 +41,10 @@
           <property name="targetMimetype" value="application/pdf" />
         </bean>
         <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.ms-excel.sheet.macroenabled.12" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
           <property name="sourceMimetype" value="application/vnd.oasis.opendocument.text" />
           <property name="targetMimetype" value="application/pdf" />
         </bean>
@@ -110,7 +114,7 @@
     <property name="maxPages" value="-1" />
     <property name="includeEmbedded" value="true" />
     <property name="optimize" value="false" />
-    <property name="level" value="1b" />
+    <property name="level" value="2b" />
   </bean>
 
   <bean name="pdfaPilot.pdfOptions" class="org.redpill.alfresco.repo.content.transform.PdfaPilotTransformationOptions">

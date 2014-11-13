@@ -69,6 +69,10 @@
           <property name="targetMimetype" value="application/pdf" />
         </bean>
         <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
+          <property name="sourceMimetype" value="application/vnd.ms-excel.sheet.macroenabled.12" />
+          <property name="targetMimetype" value="application/pdf" />
+        </bean>
+        <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
           <property name="sourceMimetype" value="application/vnd.oasis.opendocument.text" />
           <property name="targetMimetype" value="application/pdf" />
         </bean>

@@ -84,6 +84,12 @@
       "inputFamily": "SPREADSHEET"
    },
    {
+      "name": "Microsoft Excel 2007 macro-enabled workbook",
+      "extension": "xlsm",
+      "mediaType": "application/vnd.ms-excel.sheet.macroenabled.12",
+      "inputFamily": "SPREADSHEET"
+   },
+   {
       "name": "Comma Separated Values",
       "extension": "csv",
       "mediaType": "text/csv",

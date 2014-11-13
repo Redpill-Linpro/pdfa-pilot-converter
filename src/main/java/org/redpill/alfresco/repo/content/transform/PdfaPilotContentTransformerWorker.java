@@ -248,7 +248,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     long timeoutMs = options.getTimeoutMs();
 
     RuntimeExec.ExecutionResult result = _executer.execute(properties, timeoutMs);
-
+    
     // everything from pdfaPilot that's equal to or above 100 is an error
     if (result.getExitValue() >= 100) {
       targetFile.delete();
@@ -350,7 +350,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
   private File getTempFromFile(NodeRef nodeRef, String extension) {
     if (nodeRef == null) {
-      return TempFileProvider.createTempFile("JodContentTransformer-source-", "." + extension);
+      return TempFileProvider.createTempFile("PPCTW_", "." + extension);
     }
 
     try {

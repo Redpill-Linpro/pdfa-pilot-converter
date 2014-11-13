@@ -39,12 +39,14 @@ public class DefaultDocumentFormatRegistryTest {
     DocumentFormat pdfDocumentFormat = _documentFormatRegistry.getFormatByExtension("pdf");
     DocumentFormat docDocumentFormat = _documentFormatRegistry.getFormatByExtension("doc");
     DocumentFormat xlsDocumentFormat = _documentFormatRegistry.getFormatByExtension("xls");
+    DocumentFormat xlsmDocumentFormat = _documentFormatRegistry.getFormatByExtension("xlsm");
     DocumentFormat pptDocumentFormat = _documentFormatRegistry.getFormatByExtension("ppt");
     DocumentFormat odtDocumentFormat = _documentFormatRegistry.getFormatByExtension("odt");
 
     assertNotNull(pdfDocumentFormat);
     assertNotNull(docDocumentFormat);
     assertNotNull(xlsDocumentFormat);
+    assertNotNull(xlsmDocumentFormat);
     assertNotNull(pptDocumentFormat);
     assertNotNull(odtDocumentFormat);
   }

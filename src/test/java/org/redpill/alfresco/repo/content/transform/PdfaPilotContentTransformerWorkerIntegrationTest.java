@@ -19,6 +19,7 @@ import org.alfresco.repo.content.filestore.FileContentWriter;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.MimetypeService;
 import org.alfresco.service.cmr.repository.TransformationOptions;
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -104,12 +105,17 @@ public class PdfaPilotContentTransformerWorkerIntegrationTest {
     transformFile("/test.pdf", MimetypeMap.MIMETYPE_PDF, 5);
   }
 
+  @Test
+  public void transformXlsm() throws IOException {
+    transformFile("/test.xlsm", MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_MACRO, 1);
+  }
+
   protected void transformFile(String filename, String sourceMimetype, int expectedPageCount) throws IOException {
     when(_mimetypeService.getExtension(sourceMimetype)).thenReturn(FilenameUtils.getExtension(filename));
     when(_mimetypeService.getExtension("application/pdf")).thenReturn("pdf");
 
-    File sourceFile = File.createTempFile("test_", FilenameUtils.getName(filename));
-    File targetFile = File.createTempFile("test_", "test.pdf");
+    File sourceFile = TempFileProvider.createTempFile("test_", FilenameUtils.getName(filename));
+    File targetFile = TempFileProvider.createTempFile("test_", "test.pdf");
 
     InputStream inputStream = this.getClass().getResourceAsStream(filename);
 
@@ -125,7 +131,7 @@ public class PdfaPilotContentTransformerWorkerIntegrationTest {
 
     PdfaPilotTransformationOptions options = new PdfaPilotTransformationOptions();
     options.setOptimize(false);
-    options.setLevel(PdfaPilotTransformationOptions.PDFA_LEVEL_1B);
+    options.setLevel(PdfaPilotTransformationOptions.PDFA_LEVEL_2B);
 
     try {
       _contentTransformerWorker.transform(reader, writer, options);
