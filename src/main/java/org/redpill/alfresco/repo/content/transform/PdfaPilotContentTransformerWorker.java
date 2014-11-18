@@ -59,6 +59,8 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   private NodeService _nodeService;
 
   private boolean _enabled;
+  
+  private boolean _debug = false;
 
   @Override
   public void setMimetypeService(MimetypeService mimetypeService) {
@@ -79,6 +81,10 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     if (!_enabled) {
       _available = false;
     }
+  }
+  
+  public void setDebug(boolean debug) {
+    _debug = debug;
   }
 
   /**
@@ -113,6 +119,10 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
   @Override
   public boolean isAvailable() {
+    if (_debug) {
+      return true;
+    }
+    
     _available = pingServer();
 
     return _available;
@@ -367,6 +377,16 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       // TODO: Investigate if this is really needed
       // callas currently has a bug that makes it crash if the whole filepath is longer than 260 characters
       basename = StringUtils.substring(basename, 0, 100);
+      
+      // 0x2013 is the long hyphen, not allowed here...
+      char c = 0x2013;
+      if (StringUtils.contains(basename, c)) {
+        if (LOG.isTraceEnabled()) {
+          LOG.trace("Long hyphen replaced with short one");
+        }
+        
+        basename = StringUtils.replaceChars(basename, c, '-');
+      }
 
       filename = basename + "." + extension;
 
