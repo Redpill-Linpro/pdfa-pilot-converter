@@ -361,8 +361,14 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       FileUtils.forceMkdir(tempDir);
 
       String filename = (String) _nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+      
+      String basename = FilenameUtils.getBaseName(filename);
+      
+      // TODO: Investigate if this is really needed
+      // callas currently has a bug that makes it crash if the whole filepath is longer than 260 characters
+      basename = StringUtils.substring(basename, 0, 100);
 
-      filename = FilenameUtils.getBaseName(filename) + "." + extension;
+      filename = basename + "." + extension;
 
       return new File(tempDir, filename);
     } catch (final Exception ex) {
