@@ -2,6 +2,8 @@ package org.redpill.alfresco.repo.content.transform;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,11 +57,11 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   private MimetypeService _mimetypeService;
 
   private DocumentFormatRegistry _documentFormatRegistry;
-  
+
   private NodeService _nodeService;
 
   private boolean _enabled;
-  
+
   private boolean _debug = false;
 
   @Override
@@ -70,7 +72,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   public void setDocumentFormatRegistry(DocumentFormatRegistry documentFormatRegistry) {
     _documentFormatRegistry = documentFormatRegistry;
   }
-  
+
   public void setNodeService(NodeService nodeService) {
     _nodeService = nodeService;
   }
@@ -82,7 +84,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       _available = false;
     }
   }
-  
+
   public void setDebug(boolean debug) {
     _debug = debug;
   }
@@ -122,7 +124,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     if (_debug) {
       return true;
     }
-    
+
     _available = pingServer();
 
     return _available;
@@ -189,7 +191,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // good with short filename if pdfaPilot is on Windows machine with limited
     // hierarchy
     File sourceFile = getTempFromFile(options.getSourceNodeRef(), sourceExtension);
-    
+
     if (LOG.isDebugEnabled()) {
       LOG.debug("Setting source file to " + sourceFile);
     }
@@ -258,7 +260,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     long timeoutMs = options.getTimeoutMs();
 
     RuntimeExec.ExecutionResult result = _executer.execute(properties, timeoutMs);
-    
+
     // everything from pdfaPilot that's equal to or above 100 is an error
     if (result.getExitValue() >= 100) {
       targetFile.delete();
@@ -371,24 +373,43 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       FileUtils.forceMkdir(tempDir);
 
       String filename = (String) _nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-      
+
       String basename = FilenameUtils.getBaseName(filename);
-      
+
       // TODO: Investigate if this is really needed
-      // callas currently has a bug that makes it crash if the whole filepath is longer than 260 characters
+      // callas currently has a bug that makes it crash if the whole filepath is
+      // longer than 260 characters
       basename = StringUtils.substring(basename, 0, 100);
-      
+
       // 0x2013 is the long hyphen, not allowed here...
       char c = 0x2013;
       if (StringUtils.contains(basename, c)) {
         if (LOG.isTraceEnabled()) {
           LOG.trace("Long hyphen replaced with short one");
         }
-        
+
         basename = StringUtils.replaceChars(basename, c, '-');
       }
 
       filename = basename + "." + extension;
+
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Filename before normalization");
+        
+        for (char character : filename.toCharArray()) {
+          LOG.trace(character + " : " + (int) character);
+        }
+      }
+
+      filename = Normalizer.normalize(filename, Form.NFKC);
+
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Filename after normalization");
+        
+        for (char character : filename.toCharArray()) {
+          LOG.trace(character + " : " + (int) character);
+        }
+      }
 
       return new File(tempDir, filename);
     } catch (final Exception ex) {
