@@ -210,7 +210,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // upload the output document
     if (finalTargetFile.exists() && finalTargetFile.length() > 0) {
       writer.putContent(finalTargetFile);
-    } else if (targetFile.exists() && targetFile.length() > 0) {
+    } else if (targetFile.exists() && targetFile.length() > 0) {  
       writer.putContent(targetFile);
     } else {
       boolean failSilently = isFailSilently(options);
@@ -361,7 +361,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   }
 
   private File getTempFromFile(NodeRef nodeRef, String extension) {
-    if (nodeRef == null) {
+    if (nodeRef == null || !_nodeService.exists(nodeRef)) {
       return TempFileProvider.createTempFile("PPCTW_", "." + extension);
     }
 
