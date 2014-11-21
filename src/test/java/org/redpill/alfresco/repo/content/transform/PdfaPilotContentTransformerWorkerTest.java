@@ -23,28 +23,29 @@ import static org.junit.Assert.*;
 public class PdfaPilotContentTransformerWorkerTest {
 
   /**
-   * This is a very complicated test which tests for if the long hyphen is replaced in the filename
+   * This is a very complicated test which tests for if the long hyphen is
+   * replaced in the filename
    * 
    * @throws Exception
    */
   @Test
   public void testTransform() throws Exception {
-    final String sourceFilename = "this is a test file with long (–) hyphen.doc";
-    
+    final String sourceFilename = "this is a test file with long (–) hyphen åäö.doc";
+
     MimetypeService mimetypeService = mock(MimetypeService.class);
     RuntimeExec executer = mock(RuntimeExec.class);
     ExecutionResult result = mock(ExecutionResult.class);
     NodeService nodeService = mock(NodeService.class);
 
-    PdfaPilotContentTransformerWorker worker = new PdfaPilotContentTransformerWorker(){
+    PdfaPilotContentTransformerWorker worker = new PdfaPilotContentTransformerWorker() {
       @Override
       protected void transformInternal(File sourceFile, File targetFile, File finalTargetFile, TransformationOptions options) throws Exception {
         assertNotEquals(sourceFilename, sourceFile.getName());
-        
+
         FileUtils.writeStringToFile(targetFile, "FOOBAR", "UTF-8");
       }
-    }; 
-    
+    };
+
     worker.setDebug(true);
     worker.setMimetypeService(mimetypeService);
     worker.setExecuter(executer);
