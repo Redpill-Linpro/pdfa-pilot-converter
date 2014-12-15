@@ -35,9 +35,6 @@
     <property name="worker">
       <ref bean="transformer.worker.pdfaPilot" />
     </property>
-    <property name="mimetypeLimits">
-      <ref bean="transformer.OpenOffice.mimetypeLimits" />
-    </property>
     <property name="explicitTransformations">
       <list>
         <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
@@ -100,9 +97,6 @@
         <value>application/pdf</value>
       </list>
     </property>
-    <property name="mimetypeLimits">
-      <ref bean="transformer.complex.OpenOffice.PdfBox.mimetypeLimits" />
-    </property>
   </bean>
 
   <bean id="transformer.complex.pdfaPilot.Pdf2swf" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
@@ -116,10 +110,7 @@
       <list>
         <value>application/pdf</value>
       </list>
-    </property>
-    <property name="mimetypeLimits">
-      <ref bean="transformer.complex.OpenOffice.Pdf2swf.mimetypeLimits" />
-    </property>
+    </property>   
   </bean>
 
 </beans>
