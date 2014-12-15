@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <!-- Content transformers -->
+  <!-- Content transformers 
   <bean id="transformer.complex.pdfaPilot.Image" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
@@ -15,6 +15,7 @@
       </list>
     </property>
   </bean>
+  -->
 
   <!-- Import the pdfaPilot transformer worker from the pdfaPilot subsystem -->
   <bean id="transformer.worker.pdfaPilot" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
@@ -35,7 +36,7 @@
     <property name="worker">
       <ref bean="transformer.worker.pdfaPilot" />
     </property>
-    <property name="explicitTransformations">
+    <!-- <property name="explicitTransformations">
       <list>
         <bean class="org.alfresco.repo.content.transform.ExplictTransformationDetails">
           <property name="sourceMimetype" value="application/pdf" />
@@ -82,9 +83,10 @@
           <property name="targetMimetype" value="application/pdf" />
         </bean>
       </list>
-    </property>
+    </property> -->
   </bean>
 
+<!-- 
   <bean id="transformer.complex.pdfaPilot.PdfBox" class="org.alfresco.repo.content.transform.ComplexContentTransformer" parent="baseContentTransformer">
     <property name="transformers">
       <list>
@@ -112,5 +114,5 @@
       </list>
     </property>   
   </bean>
-
+ -->
 </beans>
