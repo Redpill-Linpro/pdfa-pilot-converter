@@ -373,6 +373,8 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       FileUtils.forceMkdir(tempDir);
 
       String filename = (String) _nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+      
+      filename = filename.trim();
 
       String basename = FilenameUtils.getBaseName(filename);
 
