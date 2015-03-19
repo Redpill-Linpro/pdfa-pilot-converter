@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +20,7 @@ import org.alfresco.repo.content.filestore.FileContentReader;
 import org.alfresco.repo.content.filestore.FileContentWriter;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.MimetypeService;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.TransformationOptions;
 import org.alfresco.util.TempFileProvider;
 import org.apache.commons.io.FileUtils;
@@ -26,6 +29,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.redpill.alfresco.module.metadatawriter.factories.MetadataContentFactory;
+import org.redpill.alfresco.module.metadatawriter.factories.UnsupportedMimetypeException;
+import org.redpill.alfresco.module.metadatawriter.services.ContentFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -43,14 +49,18 @@ public class PdfaPilotContentTransformerWorkerIntegrationTest {
   private MimetypeService _mimetypeService;
 
   private PdfaPilotContentTransformerWorker _contentTransformerWorker;
+  
+  private MetadataContentFactory _metadataContentFactory;
 
   @Before
   public void setUp() {
     _contentTransformerWorker = (PdfaPilotContentTransformerWorker) _applicationContext.getBean("transformer.worker.PdfaPilot");
 
     _mimetypeService = mock(MimetypeService.class);
-
     _contentTransformerWorker.setMimetypeService(_mimetypeService);
+    
+    _metadataContentFactory = mock(MetadataContentFactory.class);
+    _contentTransformerWorker.setMetadataContentFactory(_metadataContentFactory);
   }
 
   @Test
@@ -96,26 +106,35 @@ public class PdfaPilotContentTransformerWorkerIntegrationTest {
   }
 
   @Test
-  public void transformDoc() throws IOException {
+  public void transformDoc() throws IOException, UnsupportedMimetypeException {
     transformFile("/test.doc", MimetypeMap.MIMETYPE_WORD, 6);
   }
 
   @Test
-  public void transformPdf() throws IOException {
+  public void transformDocWithAmpersandName() throws IOException, UnsupportedMimetypeException {
+    transformFile("/test&tips.doc", MimetypeMap.MIMETYPE_WORD, 6);
+  }
+
+  @Test
+  public void transformPdf() throws IOException, UnsupportedMimetypeException {
     transformFile("/test.pdf", MimetypeMap.MIMETYPE_PDF, 5);
   }
 
   @Test
-  public void transformXlsm() throws IOException {
+  public void transformXlsm() throws IOException, UnsupportedMimetypeException {
     transformFile("/test.xlsm", MimetypeMap.MIMETYPE_OPENXML_SPREADSHEET_MACRO, 1);
   }
 
-  protected void transformFile(String filename, String sourceMimetype, int expectedPageCount) throws IOException {
+  protected void transformFile(String filename, String sourceMimetype, int expectedPageCount) throws IOException, UnsupportedMimetypeException {
+    ContentFacade contentFacade = mock(ContentFacade.class);
+    
     when(_mimetypeService.getExtension(sourceMimetype)).thenReturn(FilenameUtils.getExtension(filename));
     when(_mimetypeService.getExtension("application/pdf")).thenReturn("pdf");
+    when(_metadataContentFactory.createContent(any(InputStream.class), any(OutputStream.class), eq(sourceMimetype))).thenReturn(contentFacade);
 
     File sourceFile = TempFileProvider.createTempFile("test_", FilenameUtils.getName(filename));
     File targetFile = TempFileProvider.createTempFile("test_", "test.pdf");
+    NodeRef sourceNodeRef = new NodeRef("workspace://SpacesStore/this_is_a_node_ref");
 
     InputStream inputStream = this.getClass().getResourceAsStream(filename);
 
@@ -132,6 +151,7 @@ public class PdfaPilotContentTransformerWorkerIntegrationTest {
     PdfaPilotTransformationOptions options = new PdfaPilotTransformationOptions();
     options.setOptimize(false);
     options.setLevel(PdfaPilotTransformationOptions.PDFA_LEVEL_2B);
+    options.setSourceNodeRef(sourceNodeRef);
 
     try {
       _contentTransformerWorker.transform(reader, writer, options);

@@ -1,7 +1,12 @@
 package org.redpill.alfresco.repo.content.transform;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.HashMap;
@@ -9,6 +14,9 @@ import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.content.filestore.FileContentReader;
+import org.alfresco.repo.content.metadata.MetadataExtracter;
+import org.alfresco.repo.content.metadata.MetadataExtracterRegistry;
 import org.alfresco.repo.content.transform.ContentTransformerHelper;
 import org.alfresco.repo.content.transform.ContentTransformerWorker;
 import org.alfresco.service.cmr.repository.ContentIOException;
@@ -18,17 +26,29 @@ import org.alfresco.service.cmr.repository.MimetypeService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.TransformationOptions;
+import org.alfresco.service.cmr.repository.datatype.DefaultTypeConverter;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.util.MD5;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
+import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.telnet.TelnetClient;
 import org.apache.log4j.Logger;
+import org.redpill.alfresco.module.metadatawriter.factories.MetadataContentFactory;
+import org.redpill.alfresco.module.metadatawriter.factories.UnsupportedMimetypeException;
+import org.redpill.alfresco.module.metadatawriter.services.ContentFacade;
+import org.redpill.alfresco.module.metadatawriter.services.ContentFacade.ContentException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper implements ContentTransformerWorker, InitializingBean {
+
+  private static final String START_TAG = "<start>";
+  private static final String END_TAG = "</end>";
 
   private static final Logger LOG = Logger.getLogger(PdfaPilotContentTransformerWorker.class);
 
@@ -59,6 +79,10 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
   private DocumentFormatRegistry _documentFormatRegistry;
 
   private NodeService _nodeService;
+
+  private MetadataContentFactory _metadataContentFactory;
+
+  private MetadataExtracterRegistry _metadataExtracterRegistry;
 
   private boolean _enabled;
 
@@ -172,7 +196,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       throw new ContentIOException("Content conversion failed (unavailable): \n" + "   reader: " + reader + "\n" + "   writer: " + writer);
     }
 
-    // get mimetypes
+    // get mime types
     String sourceMimetype = getMimetype(reader);
 
     String targetMimetype = getMimetype(writer);
@@ -204,14 +228,39 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // pull reader file into source temp file
     reader.getContent(sourceFile);
 
+    // write the nodes nodeRef to the document to be converted
+    boolean metadataWritten = writeAdditionalMetadataTitle(sourceFile, options.getSourceNodeRef(), sourceMimetype);
+
     // transformDoc the source temp file to the target temp file
     transformInternal(sourceFile, targetFile, finalTargetFile, options);
 
+    if (metadataWritten) {
+      verifyMetadata(options.getSourceNodeRef(), targetFile.length() > 0 && targetFile.exists() ? targetFile : finalTargetFile);
+    }
+
     // upload the output document
     if (finalTargetFile.exists() && finalTargetFile.length() > 0) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Writing content from " + finalTargetFile.getAbsolutePath());
+      }
+
       writer.putContent(finalTargetFile);
-    } else if (targetFile.exists() && targetFile.length() > 0) {  
+      
+      FileUtils.copyFile(finalTargetFile, new File("/tmp/test.pdf"));
+
+      targetFile.delete();
+      finalTargetFile.delete();
+    } else if (targetFile.exists() && targetFile.length() > 0) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Writing content from " + targetFile.getAbsolutePath());
+      }
+
       writer.putContent(targetFile);
+      
+      FileUtils.copyFile(targetFile, new File("/tmp/test.pdf"));
+
+      targetFile.delete();
+      finalTargetFile.delete();
     } else {
       boolean failSilently = isFailSilently(options);
 
@@ -227,6 +276,91 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // done
     if (LOG.isDebugEnabled()) {
       LOG.debug("Transformation completed: \n" + "   source: " + reader + "\n" + "   target: " + writer + "\n" + "   options: " + options);
+    }
+  }
+
+  private String extractMetadataTitle(File file, String mimetype) {
+    MetadataExtracter extracter = _metadataExtracterRegistry.getExtracter(mimetype);
+
+    Map<QName, Serializable> properties = new HashMap<QName, Serializable>();
+
+    FileContentReader contentReader = new FileContentReader(file);
+    contentReader.setMimetype(mimetype);
+
+    properties = extracter.extract(contentReader, properties);
+
+    String title = DefaultTypeConverter.INSTANCE.convert(String.class, properties.get(ContentModel.PROP_TITLE));
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Extracted title '" + title + "' from file '" + file.getAbsolutePath() + "'");
+    }
+
+    return StringUtils.isNotBlank(title) ? title : "";
+  }
+
+  private void verifyMetadata(NodeRef node, File file) throws UnsupportedMimetypeException {
+    String title = extractMetadataTitle(file, "application/pdf");
+
+    String hash = MD5.Digest(node.toString().getBytes());
+
+    if (!title.endsWith(START_TAG + hash + END_TAG)) {
+      throw new RuntimeException("The converted file for nodeRef '" + node + "' is not the same as the source file!");
+    }
+
+    // remove the nodeRef from the title in the document
+    title = StringUtils.replace(title, START_TAG + hash + END_TAG, "");
+
+    // write back the original title
+    writeMetadataTitle(file, node, "application/pdf", title);
+  }
+
+  private boolean writeAdditionalMetadataTitle(File file, NodeRef node, String mimetype) {
+    boolean result = false;
+
+    String hash = MD5.Digest(node.toString().getBytes());
+
+    String title = extractMetadataTitle(file, mimetype) + START_TAG + hash + END_TAG;
+
+    try {
+      writeMetadataTitle(file, node, mimetype, title);
+
+      result = true;
+    } catch (UnsupportedMimetypeException ex) {
+      // LOG.error(ex.getMessage(), ex);
+      LOG.error(ex.getMessage());
+    }
+
+    return result;
+  }
+
+  private boolean writeMetadataTitle(File file, NodeRef node, String mimetype, String title) throws UnsupportedMimetypeException {
+    InputStream inputStream = null;
+    OutputStream outputStream = null;
+    
+    File tempFile = getTempFromFile(node, FilenameUtils.getExtension(file.getName()));
+
+    try {
+      inputStream = new FileInputStream(file);
+      outputStream = new FileOutputStream(tempFile);
+
+      ContentFacade contentFacade = _metadataContentFactory.createContent(inputStream, outputStream, mimetype);
+
+      // write the nodeRef to the Title field and include the old title
+      contentFacade.writeMetadata("Title", title);
+
+      contentFacade.save();
+      
+      FileUtils.copyFile(tempFile, file);
+      
+      return true;
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    } catch (ContentException ex) {
+      throw new RuntimeException(ex);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+      IOUtils.closeQuietly(outputStream);
+      tempFile.delete();
     }
   }
 
@@ -259,7 +393,11 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // execute the statement
     long timeoutMs = options.getTimeoutMs();
 
-    RuntimeExec.ExecutionResult result = _executer.execute(properties, timeoutMs);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(StringUtils.join(_executer.getCommand(properties), " "));
+    }
+
+    ExecutionResult result = _executer.execute(properties, timeoutMs);
 
     // everything from pdfaPilot that's equal to or above 100 is an error
     if (result.getExitValue() >= 100) {
@@ -395,7 +533,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
       if (LOG.isTraceEnabled()) {
         LOG.trace("Filename before normalization");
-        
+
         for (char character : filename.toCharArray()) {
           LOG.trace(character + " : " + (int) character);
         }
@@ -405,7 +543,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
       if (LOG.isTraceEnabled()) {
         LOG.trace("Filename after normalization");
-        
+
         for (char character : filename.toCharArray()) {
           LOG.trace(character + " : " + (int) character);
         }
@@ -415,6 +553,14 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     } catch (final Exception ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  public void setMetadataContentFactory(MetadataContentFactory metadataContentFactory) {
+    _metadataContentFactory = metadataContentFactory;
+  }
+
+  public void setMetadataExtracterRegistry(MetadataExtracterRegistry metadataExtracterRegistry) {
+    _metadataExtracterRegistry = metadataExtracterRegistry;
   }
 
 }
