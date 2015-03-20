@@ -47,9 +47,6 @@ import org.springframework.util.Assert;
 
 public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper implements ContentTransformerWorker, InitializingBean {
 
-  private static final String START_TAG = "<start>";
-  private static final String END_TAG = "</end>";
-
   private static final Logger LOG = Logger.getLogger(PdfaPilotContentTransformerWorker.class);
 
   /**
@@ -228,14 +225,14 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     // pull reader file into source temp file
     reader.getContent(sourceFile);
 
-    // write the nodes nodeRef to the document to be converted
-    boolean metadataWritten = writeAdditionalMetadataTitle(sourceFile, options.getSourceNodeRef(), sourceMimetype);
+    // write a unique hash of the nodeRef to the document to be converted
+    String title = changeMetadataTitle(sourceFile, options.getSourceNodeRef(), sourceMimetype);
 
     // transformDoc the source temp file to the target temp file
     transformInternal(sourceFile, targetFile, finalTargetFile, options);
 
-    if (metadataWritten) {
-      verifyMetadata(options.getSourceNodeRef(), targetFile.length() > 0 && targetFile.exists() ? targetFile : finalTargetFile);
+    if (title != null) {
+      verifyMetadata(options.getSourceNodeRef(), targetFile.length() > 0 && targetFile.exists() ? targetFile : finalTargetFile, title);
     }
 
     // upload the output document
@@ -245,7 +242,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       }
 
       writer.putContent(finalTargetFile);
-      
+
       FileUtils.copyFile(finalTargetFile, new File("/tmp/test.pdf"));
 
       targetFile.delete();
@@ -256,7 +253,7 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       }
 
       writer.putContent(targetFile);
-      
+
       FileUtils.copyFile(targetFile, new File("/tmp/test.pdf"));
 
       targetFile.delete();
@@ -279,6 +276,14 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     }
   }
 
+  /**
+   * Extracts the metadata title from the file. If no title found it returns an
+   * empty string (not null).
+   * 
+   * @param file
+   * @param mimetype
+   * @return the title or an empty string
+   */
   private String extractMetadataTitle(File file, String mimetype) {
     MetadataExtracter extracter = _metadataExtracterRegistry.getExtracter(mimetype);
 
@@ -298,45 +303,64 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     return StringUtils.isNotBlank(title) ? title : "";
   }
 
-  private void verifyMetadata(NodeRef node, File file) throws UnsupportedMimetypeException {
-    String title = extractMetadataTitle(file, "application/pdf");
+  private void verifyMetadata(NodeRef node, File file, String title) throws UnsupportedMimetypeException {
+    String extractedHash = extractMetadataTitle(file, "application/pdf");
 
     String hash = MD5.Digest(node.toString().getBytes());
 
-    if (!title.endsWith(START_TAG + hash + END_TAG)) {
+    if (!hash.equals(extractedHash)) {
       throw new RuntimeException("The converted file for nodeRef '" + node + "' is not the same as the source file!");
     }
-
-    // remove the nodeRef from the title in the document
-    title = StringUtils.replace(title, START_TAG + hash + END_TAG, "");
 
     // write back the original title
     writeMetadataTitle(file, node, "application/pdf", title);
   }
 
-  private boolean writeAdditionalMetadataTitle(File file, NodeRef node, String mimetype) {
-    boolean result = false;
-
-    String hash = MD5.Digest(node.toString().getBytes());
-
-    String title = extractMetadataTitle(file, mimetype) + START_TAG + hash + END_TAG;
+  /**
+   * Extracts the title from the document and returns it if found, otherwise
+   * returns null. Writes a hash of the nodeRef as a new title.
+   * 
+   * @param file
+   * @param node
+   * @param mimetype
+   * @return the title or null if no title found or the hash couldn't be written.
+   */
+  private String changeMetadataTitle(File file, NodeRef node, String mimetype) {
+    String title = null;
 
     try {
-      writeMetadataTitle(file, node, mimetype, title);
+      title = extractMetadataTitle(file, mimetype);
 
-      result = true;
+      String hash = MD5.Digest(node.toString().getBytes());
+
+      writeMetadataTitle(file, node, mimetype, hash);
     } catch (UnsupportedMimetypeException ex) {
-      // LOG.error(ex.getMessage(), ex);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace(ex.getMessage(), ex);
+      }
+
       LOG.error(ex.getMessage());
+      
+      title = null;
     }
 
-    return result;
+    return title;
   }
 
-  private boolean writeMetadataTitle(File file, NodeRef node, String mimetype, String title) throws UnsupportedMimetypeException {
+  /**
+   * Writes a metadata title to a document that supports it. Throws an exception
+   * if title can't be written.
+   * 
+   * @param file
+   * @param node
+   * @param mimetype
+   * @param title
+   * @throws UnsupportedMimetypeException
+   */
+  private void writeMetadataTitle(File file, NodeRef node, String mimetype, String title) throws UnsupportedMimetypeException {
     InputStream inputStream = null;
     OutputStream outputStream = null;
-    
+
     File tempFile = getTempFromFile(node, FilenameUtils.getExtension(file.getName()));
 
     try {
@@ -349,10 +373,8 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       contentFacade.writeMetadata("Title", title);
 
       contentFacade.save();
-      
+
       FileUtils.copyFile(tempFile, file);
-      
-      return true;
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     } catch (ContentException ex) {

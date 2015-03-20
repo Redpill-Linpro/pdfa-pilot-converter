@@ -26,6 +26,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.TransformationOptions;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.MD5;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
 import org.apache.commons.io.FileUtils;
@@ -80,7 +81,7 @@ public class PdfaPilotContentTransformerWorkerTest {
     Map<QName, Serializable> mswordProperties = new HashMap<QName, Serializable>();
     mswordProperties.put(ContentModel.PROP_TITLE, "This is a title");
     Map<QName, Serializable> pdfProperties = new HashMap<QName, Serializable>();
-    pdfProperties.put(ContentModel.PROP_TITLE, "This is a title<start>" + sourceNodeRef.toString() + "</end>");
+    pdfProperties.put(ContentModel.PROP_TITLE, MD5.Digest(sourceNodeRef.toString().getBytes()));
 
     when(reader.getMimetype()).thenReturn(sourceMimetype);
     when(writer.getMimetype()).thenReturn("application/pdf");

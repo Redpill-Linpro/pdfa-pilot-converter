@@ -96,6 +96,13 @@ public class BetterPdfaPilotContentTransformerWorkerIntegrationTest extends Abst
     testDocument("test.xlsx");
   }
 
+  @Test
+  /* This document fails because it has a check that removes all properties from it...
+  public void testDoc2() throws Exception {
+    testDocument("test2.doc");
+  }
+  */
+
   public void testDocument(String filename) throws Exception {
     System.out.println("Converting " + filename + "...");
     
