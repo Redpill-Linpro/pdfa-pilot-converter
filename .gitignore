@@ -5,3 +5,5 @@
 /target/
 /.idea/
 alf_data_dev
+.DS_Store
+rebel.xml

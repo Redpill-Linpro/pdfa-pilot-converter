@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
   <!-- Global properties used in property expansion throughout the container, overridable via JNDI or System properties -->
   <bean name="global-properties" class="org.alfresco.config.JndiPropertiesFactoryBean">
@@ -43,7 +42,7 @@
     </property>
   </bean>
 
-  <!-- This is a mocked MimetypeService -->
+  <!-- This is a mocked NodeService -->
   <bean name="NodeService" class="org.springframework.aop.framework.ProxyFactoryBean">
     <property name="target">
       <bean class="org.mockito.Mockito" factory-method="mock">
@@ -53,6 +52,22 @@
     <property name="proxyInterfaces">
       <value>org.alfresco.service.cmr.repository.NodeService</value>
     </property>
+  </bean>
+
+  <!-- This is a mocked MimetypeService -->
+  <bean name="metadata-writer.contentFactory" class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="target">
+      <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="org.redpill.alfresco.module.metadatawriter.factories.MetadataContentFactory" />
+      </bean>
+    </property>
+    <property name="proxyInterfaces">
+      <value>org.redpill.alfresco.module.metadatawriter.factories.MetadataContentFactory</value>
+    </property>
+  </bean>
+
+  <bean id="metadataExtracterRegistry" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg value="org.alfresco.repo.content.metadata.MetadataExtracterRegistry" />
   </bean>
 
   <bean name="transformer.worker.PdfaPilot" class="org.redpill.alfresco.repo.content.transform.PdfaPilotContentTransformerWorker" parent="transformer.worker.abstractPdfaPilot">

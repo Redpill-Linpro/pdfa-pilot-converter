@@ -7,6 +7,8 @@
     <property name="pdfaPilotExe" value="${pdfapilot.exe}" />
     <property name="documentFormatRegistry" ref="pdfaPilot.documentFormatRegistry" />
     <property name="nodeService" ref="NodeService" />
+    <property name="metadataContentFactory" ref="metadata-writer.contentFactory" />
+    <property name="metadataExtracterRegistry" ref="metadataExtracterRegistry" />
     <property name="executer" ref="pdfaPilot.command" />
     <property name="checkCommand" ref="pdfaPilot.checkCommand" />
     <property name="enabled" value="${pdfapilot.enabled}" />
