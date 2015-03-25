@@ -226,14 +226,14 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
     reader.getContent(sourceFile);
 
     // write a unique hash of the nodeRef to the document to be converted
-    String title = changeMetadataTitle(sourceFile, options.getSourceNodeRef(), sourceMimetype);
+    // String title = changeMetadataTitle(sourceFile, options.getSourceNodeRef(), sourceMimetype);
 
     // transformDoc the source temp file to the target temp file
     transformInternal(sourceFile, targetFile, finalTargetFile, options);
 
-    if (title != null) {
-      verifyMetadata(options.getSourceNodeRef(), targetFile.length() > 0 && targetFile.exists() ? targetFile : finalTargetFile, title);
-    }
+    // if (title != null) {
+    //  verifyMetadata(options.getSourceNodeRef(), targetFile.length() > 0 && targetFile.exists() ? targetFile : finalTargetFile, title);
+    // }
 
     // upload the output document
     if (finalTargetFile.exists() && finalTargetFile.length() > 0) {
@@ -243,8 +243,6 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
 
       writer.putContent(finalTargetFile);
 
-      FileUtils.copyFile(finalTargetFile, new File("/tmp/test.pdf"));
-
       targetFile.delete();
       finalTargetFile.delete();
     } else if (targetFile.exists() && targetFile.length() > 0) {
@@ -253,8 +251,6 @@ public class PdfaPilotContentTransformerWorker extends ContentTransformerHelper 
       }
 
       writer.putContent(targetFile);
-
-      FileUtils.copyFile(targetFile, new File("/tmp/test.pdf"));
 
       targetFile.delete();
       finalTargetFile.delete();
